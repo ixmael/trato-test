@@ -1,0 +1,19 @@
+{
+  "presets": [
+    "@babel/env",
+    "@vue/app"
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "~": "./client-web",
+          "@views": "./client-web/views"
+        }
+      }
+    ]
+  ]
+}
