@@ -56,9 +56,8 @@ database.query(`SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM infor
   });
 
   const i = mustache.render(indexTemplate, {
-    //app.use('/api', require("@api"));
-    //requires: index.map(r => `const ${r} = require('./${r}');`).join('\n'),
     requires: index.map(r => `routes.use('/${r}', require('./${r}'));`).join('\n'),
+    resources: index.map(r => `'${r}'`).join(',')
   });
 
   fs.writeFile(`./src/api/index.js`, i, function(err) {

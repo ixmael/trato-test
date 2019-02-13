@@ -2,4 +2,12 @@ const routes = require('express').Router();
 
 {{{requires}}}
 
+routes.use('/', (req, res) => {
+  res.send(
+    {
+      resources: [{{{resources}}}],
+    }
+  );
+});
+
 module.exports = routes;

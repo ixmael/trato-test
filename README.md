@@ -1,6 +1,12 @@
 # Prueba de Nodejs para TRATO
 Este es el ejercicio de la sección de **Web Application**.
 
+## Proyecto
+Las carpetas principales del proyecto son:
+* **client-web**: componentes básicos para generar la página inicial del sitio.
+* **scripts**: programas de ayuda para la REST API.
+* **src**: contiene los componentes para cargar la REST API.
+
 ## Ambiente
 El proyecto require de un archivo *.env* con las variables necesarias para el proyecto. Las variables requeridas en este proyecto son:
 * **Servidor**
@@ -19,6 +25,7 @@ El proyecto contiene un script para generar un mapeo de las tablas de la base de
 ```bash
 yarn run generate:schema
 ```
+Este script genera toda configuración de express routers en la carpeta *src/api*. Este debe ejecutarse antes de
 
 ## Desarrollo
 Para iniciar 
@@ -27,4 +34,12 @@ yarn run start:dev
 ```
 
 ## Deploy
-**TODO**
+Para construir el proyecto se usa:
+```bash
+yarn run build
+```
+
+Para iniciar el proyecto se utiliza:
+```bash
+yarn run start
+```

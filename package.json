@@ -8,10 +8,11 @@
   "private": true,
   "scripts": {
     "schema:generate": "node scripts/schemaGenerate.js",
+    "start:dev": "NODE_ENV=development yarn run web:dev && nodemon src/index.js --exec node",
     "web:dev": "webpack --config ./webpack.config/development",
     "web": "webpack --config ./webpack.config/production",
-    "start:dev": "NODE_ENV=development yarn run web:dev && nodemon src/index.js --exec node",
-    "start": "node src/index.js"
+    "build": "yarn run web && babel src -d build --copy-files",
+    "start": "node build/index.js"
   },
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.2.0",
@@ -37,6 +38,8 @@
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.5.0",
     "nodemon": "^1.18.10",
+    "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "uglifyjs-webpack-plugin": "^2.1.1",
     "vue-loader": "^15.6.2",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.2.3",
