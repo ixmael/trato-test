@@ -6,3 +6,4 @@
 /**/.env
 
 !/**/.gitkeep
+!/src/api/index.js
