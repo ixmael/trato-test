@@ -39,7 +39,6 @@ module.exports = {
         test: /\.css$/,
         use: [
           devMode ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-          //MiniCssExtractPlugin.loader,
           "css-loader",
         ]
       },
@@ -48,21 +47,13 @@ module.exports = {
   plugins: [
     new ManifestPlugin(),
     new  MiniCssExtractPlugin({
-      filename: devMode ? 'css/[name].css' : 'css/[name].[hash].css',
-      chunkFilename: devMode ? 'css/[id].css' : 'css/[id].[hash].css',
+      filename: devMode ? 'css/[name].css' : 'css/[name].css',
+      chunkFilename: devMode ? 'css/[id].css' : 'css/[id].css',
     }),
     new VueLoaderPlugin(),
     //new webpack.ProvidePlugin({}),
     new HtmlWebpackPlugin({
       template: path.resolve(PROJECT_PATH, 'client-web', 'html.ejs'),
-      inject: true,
-      // minify: {
-      //     collapseWhitespace: true,
-      //     removeComments: true,
-      //     removeRedundantAttributes: true,
-      //     removeScriptTypeAttributes: true,
-      //     removeStyleLinkTypeAttributes: true
-      // }
     }),
   ],
   resolve: {
