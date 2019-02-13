@@ -9,7 +9,7 @@ const database = require('@services/database');
 
 const schema = {};
 
-database.query(`SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM information_schema.columns WHERE table_schema="${process.env.MYSQL_DB_NAME}" AND TABLE_NAME IN (SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_TYPE="BASE TABLE" AND TABLE_SCHEMA="${process.env.MYSQL_DB_NAME}") ORDER BY TABLE_NAME;`, (error, results, fields) => {
+database.query(`SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY, COLUMN_DEFAULT FROM information_schema.columns WHERE table_schema="${process.env.MYSQL_DB_NAME}" AND TABLE_NAME IN (SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_TYPE="BASE TABLE" AND TABLE_SCHEMA="${process.env.MYSQL_DB_NAME}") ORDER BY TABLE_NAME;`, (error, results, fields) => {
   results.forEach(r => {
     if (!(r.TABLE_NAME in schema)) {
       schema[r.TABLE_NAME] = {
@@ -21,10 +21,12 @@ database.query(`SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM infor
     if (r.COLUMN_KEY === 'PRI') {
       schema[r.TABLE_NAME]['idField'].push(r.COLUMN_NAME);
     }
-    else if (r.COLUMN_KEY !== 'MUL') {
+    else {
       schema[r.TABLE_NAME]['fields'].push(r.COLUMN_NAME);
     }
   });
+
+  //console.log("SCHEMA", schema);
 
   const template = fs.readFileSync('./scripts/resourceTemplate.txt', 'utf8');
   const indexTemplate = fs.readFileSync('./scripts/index.txt', 'utf8');

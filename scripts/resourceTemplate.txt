@@ -1,6 +1,7 @@
 const routes = require('express').Router();
 
 const database = require('@services/database');
+const { rowExists } = require('@services/database/util');
 
 const idField = '{{{idField}}}';
 const fields = [{{{fields}}}];
@@ -38,45 +39,56 @@ routes.get('/', (req, res) => {
 });
 
 routes.get('/:id', (req, res) => {
-  const restrictedFields = [idField].concat(req.query.fields ? req.query.fields.split(',') : fields);
-  database.query(`SELECT ${restrictedFields.join(',')} FROM country WHERE ${idField}="${req.params.id}";`, (error, results) => {
-    if (error) {
-      res.status(500).json({
-        error: 'There is error in the query',
-        message: error.message,
-      });
-    }
-    else if (results.length === 0) {
+  rowExists('{{table}}', req.params.id, idField)
+    .then(exists => {
+      if (exists) {
+        const restrictedFields = [idField].concat(req.query.fields ? req.query.fields.split(',') : fields);
+        database.query(`SELECT ${restrictedFields.join(',')} FROM {{table}} WHERE ${idField}="${req.params.id}";`, (error, results) => {
+          if (error) {
+            res.status(500).json({
+              error: 'There is error in the query',
+              message: error.message,
+            });
+          }
+          else {
+            const data = [];
+            results.forEach(r => {
+              const o = {};
+              restrictedFields.forEach(f => o[f] = r[f]);
+              data.push(o);
+            });
+
+            res.json({
+              total: results.length,
+              idField: idField,
+              data,
+            });
+          }
+        });
+      }
+      else {
+        res.status(404).json({
+          message: 'There is not element',
+        });
+      }
+    })
+    .catch(err => {
       res.status(404).json({
         message: 'There is not element',
       });
-    }
-    else {
-      const data = [];
-      results.forEach(r => {
-        const o = {};
-        restrictedFields.forEach(f => o[f] = r[f]);
-        data.push(o);
-      });
-      
-      res.json({
-        total: results.length,
-        idField: idField,
-        data,
-      });
-    }
-  });
+    });
 });
 
 routes.post('/', (req, res) => {
   if (requiredFields.some(f => !(f in req.body))) {
-    res.status().json({
+    res.status(404).json({
       message: 'The params are not completed',
+      requiredFields,
     });
   }
   else {
     const values = [ requiredFields.map(f => req.body[f]) ];
-    database.query(`INSERT INTO country (${requiredFields.join(',')}) VALUES ?;`, [ values ], (error, result) => {
+    database.query(`INSERT INTO {{table}} (${requiredFields.join(',')}) VALUES ?;`, [ values ], (error, result) => {
       if (error) {
         res.status(500).json({
           error: 'There is error in the query',
@@ -93,43 +105,81 @@ routes.post('/', (req, res) => {
 });
 
 routes.put('/:id', (req, res) => {
-  if (requiredFields.some(f => !(f in req.body))) {
-    res.status().json({
-      message: 'The params are not completed',
-    });
-  }
-  else {
-    const values = [ requiredFields.map(f => `${f} = '${req.body[f]}'`) ];
-    database.query(`UPDATE country SET ${values.join(' ')} WHERE ${idField}="${req.params.id}";`, [ values ], (error, result) => {
-      if (error) {
-        res.status(500).json({
-          error: 'There is error in the query',
-          message: error.message,
+  rowExists('{{table}}', req.params.id, idField)
+    .then(exists => {
+      if (exists) {
+        const values = [];
+        requiredFields.forEach(f => {
+          if (req.body[f]) {
+            values.push(`${f} = '${req.body[f]}'`);
+          }
         });
+
+        if (values.length > 0) {
+          database.query(`UPDATE {{table}} SET ${values.join(' ')} WHERE ${idField}="${req.params.id}";`, [ values ], (error, result) => {
+            if (error) {
+              res.status(500).json({
+                error: 'There is error in the query',
+                message: error.message,
+              });
+            }
+            else {
+              res.json({
+                affectedRows: result.affectedRows,
+              });
+            }
+          });
+        }
+        else {
+          res.status(404).json({
+            message: 'The request body has not fields to update',
+          });
+        }
       }
       else {
-        res.json({
-          id: result.insertId,
+        res.status(404).json({
+          message: 'The params are not completed',
+          requiredFields,
         });
       }
+    })
+    .catch(err => {
+      res.status(404).json({
+        message: 'There is not element',
+      });
     });
-  }
 });
 
 routes.delete('/:id', (req, res) => {
-  database.query(`DELETE FROM country WHERE ${idField}="${req.params.id}";`, (error, result) => {
-    if (error) {
-      res.status(500).json({
-        error: 'There is error in the query',
-        message: error.message,
+  rowExists('{{table}}', req.params.id, idField)
+    .then(exists => {
+      if (exists) {
+        database.query(`DELETE FROM {{table}} WHERE ${idField}="${req.params.id}";`, (error, result) => {
+          if (error) {
+            res.status(500).json({
+              error: 'There is error in the query',
+              message: error.message,
+            });
+          }
+          else {
+            res.json({
+              affectedRows: result.affectedRows,
+            });
+          }
+        });
+      }
+      else {
+        res.status(404).json({
+          message: 'The params are not completed',
+          requiredFields,
+        });
+      }
+    })
+    .catch(err => {
+      res.status(404).json({
+        message: 'There is not element',
       });
-    }
-    else {
-      res.json({
-        affectedRows: result.affectedRows,
-      });
-    }
-  });
+    });
 });
 
 module.exports = routes;

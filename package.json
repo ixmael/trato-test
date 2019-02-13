@@ -10,7 +10,7 @@
     "schema:generate": "node scripts/schemaGenerate.js",
     "start:dev": "NODE_ENV=development yarn run web:dev && nodemon src/index.js --exec node",
     "web:dev": "webpack --config ./webpack.config/development",
-    "web": "webpack --config ./webpack.config/production",
+    "web": "NODE_ENV=development webpack --config ./webpack.config/production",
     "build": "yarn run web && babel src -d build --copy-files",
     "start": "node build/index.js"
   },
